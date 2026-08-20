@@ -16,41 +16,49 @@ Vanilla Satisfactory already supports stack splitting (right-click = split, righ
 
 ## Bug hypothesis (to verify once toolchain is available)
 
-The symptom — splitting works up to the *vanilla* stack size but not beyond — strongly
-suggests two different sources of truth for "max stack size":
+**Key facts from the modding Discord (2026-08-20):**
 
-- `UFGInventoryComponent` supports **arbitrary/override slot sizes** (see
-  `FGInventoryComponent.h`); if Stack Resizer raises capacity via slot-size overrides
-  or a runtime patch rather than editing every `UFGItemDescriptor`'s stack size, then
-  any code that reads `UFGItemDescriptor::GetStackSize()` (likely the split
-  quantity-picker widget and/or the server-side split validation) still sees the
-  vanilla value and clamps/rejects amounts above it.
-- Alternative: the descriptor *is* updated, but the split path caches the stack size
-  (CDO read at startup) or validates against `FItemAmount`/enum-based stack size
-  (`EStackSize`) rather than the effective slot capacity.
+- **The bug only occurs in multiplayer / dedicated-server games** — singleplayer
+  splitting works fine with oversized stacks (per MadCat256). This points at
+  **replication / netcode**, not a simple UI clamp.
+- The split flow: a `CanSplitStack`-style check gates the action (it also decides
+  whether the UI shows "open in codex" vs. split); `SplitStack` is called when it
+  returns true (per word).
+- SirDigby (has seen the actual game source): "it isn't that simple" — i.e. not just
+  an inlined stack-size enum comparison. Don't assume the naive clamp theory.
 
-Either way, the fix shape is the same: hook the split flow and replace the "max"
-lookup with the *effective* slot capacity (slot's actual item count / inventory
-component's slot size), not the descriptor's nominal stack size.
+**Working hypothesis:** the client→server path for the split (RPC arguments, or the
+inventory-state serialization it round-trips through) validates or quantizes the item
+count against the descriptor's *vanilla* stack size — e.g. server-side validation in
+the split RPC, or `NetSerialize` of `FInventoryStack`/`FInventoryItem` clamping counts
+to nominal stack size. In SP there's no serialization/validation boundary, which is
+why it works there.
+
+Secondary suspects (weaker, given the MP-only symptom): stack-size lookups via
+`UFGItemDescriptor::GetStackSize()` vs. `UFGInventoryComponent` per-slot overrides
+disagreeing only on the server side (does Stack Resizer's resize logic even run on
+dedicated servers?).
 
 ## Where to look (investigation plan, needs Windows/Linux + toolchain)
 
-1. **Characterize the failure mode** (already reproduced; pin down which layer):
-   - Right-click-hold amount picker: is its max capped at the vanilla stack size, or
-     can you enter a larger amount that then no-ops?
-   - Plain right-click (split in half) on an oversized stack: does it do nothing, or
-     split into vanilla-sized halves?
-   - UI capped → clamp is in the quantity-picker widget (Blueprint hook fix).
-     Accepted-but-no-op → clamp/reject is in the inventory/server code (C++ hook fix).
-2. **Find the vanilla split implementation**:
-   - Extract game UI assets (docs: "Extracting Game Files") — locate the inventory
-     slot widget and the split/quantity-picker widget, follow what function performs
-     the split and what it clamps against.
-   - Check `FGInventoryComponent.h` / `FGInventoryLibrary.h` headers in the starter
-     project for split/take-amount functions and their validation.
+1. **Characterize the failure mode across net modes** (bug is MP/dedi-only):
+   - Confirm: SP works, listen-server host works?, remote client fails, dedi client
+     fails. If the *host* of a listen server also fails, the clamp is in shared
+     server code; if only remote clients fail, it's in the RPC/replication boundary.
+   - On failure: does the amount picker cap at vanilla max, or accept the amount and
+     no-op? Does plain right-click (split-half) also fail?
+2. **Find the vanilla split implementation** (starter project headers + extracted
+   assets):
+   - Locate the `CanSplitStack` / `SplitStack` flow (names per Discord) — likely in
+     `FGInventoryComponent.h`, `FGInventoryLibrary.h`, or the slot widget code — and
+     trace the client→server RPC it goes through in MP.
+   - Inspect `NetSerialize`/replication of `FInventoryStack` / `FInventoryItem` and
+     any server-side validation of the split RPC for stack-size-based clamps.
+   - Extract game UI assets (docs: "Extracting Game Files") for the slot and
+     quantity-picker widgets to see what the client sends.
 3. **Inspect Stack Resizer itself**: download its `.pak`/plugin from SMR and open with
-   FModel/UAssetGUI to see how it applies sizes (descriptor edit vs slot override).
-   This confirms which hypothesis is right and whether the bug is theirs or vanilla's.
+   FModel/UAssetGUI to see how it applies sizes (descriptor edit vs slot override),
+   and whether its resize logic runs on dedicated servers at all.
 4. **Upstream**: existing bug reports have had no movement — don't block on the
    author. Once diagnosed, optionally post the root cause on the mod's SMR chat /
    Discord thread as a courtesy, but ship the companion mod regardless.
@@ -66,8 +74,10 @@ component's slot size), not the descriptor's nominal stack size.
   handler) and lift the clamp to the effective slot capacity.
 - If the clamp lives in a Blueprint widget instead: **Blueprint hooks** /
   **Widget Blueprint Hooks** (https://docs.ficsit.app/satisfactory-modding/latest/Development/ModLoader/WidgetBlueprintHooks.html).
-- Multiplayer: if validation is server-side, the hook must apply on the server too —
-  test in MP per the docs' multiplayer-testing page.
+- **The fix almost certainly must run server-side** (bug is MP/dedi-only): build and
+  test the mod for the dedicated-server target too — this makes the Linux
+  cross-compile toolchain (see `docs/toolchain.md`) required, not optional. Test in
+  MP per the docs' multiplayer-testing page, including a real dedicated server.
 
 ## Relevant game classes (inventory system)
 
