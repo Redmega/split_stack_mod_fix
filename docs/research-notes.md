@@ -57,7 +57,10 @@ component's slot size), not the descriptor's nominal stack size.
 
 ## Fix-mod approach (primary plan)
 
-- Small C++ SML mod, optional dependency on `StackResizer`.
+- Small C++ SML mod with **`StackResizer` as a required dependency** (declared in the
+  `.uplugin`) — the mod only exists to patch Stack Resizer's interaction with the
+  split flow, and depending on it guarantees load order and surfaces the relationship
+  in the mod manager.
 - Use SML **hooking** (https://docs.ficsit.app/satisfactory-modding/latest/Development/Cpp/hooking.html)
   to hook the split/take function (likely in `UFGInventoryComponent` or the widget's
   handler) and lift the clamp to the effective slot capacity.

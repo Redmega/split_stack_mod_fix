@@ -11,6 +11,7 @@ with increased stack sizes, vanilla split (right-click / right-click-hold) fails
 stacks whose count exceeds the vanilla stack size. Reproduced in-game; existing bug
 reports against Stack Resizer (closed source) have gone nowhere, so the plan is a
 small companion patch mod that lifts the vanilla-stack-size clamp in the split flow.
+The mod will declare **Stack Resizer as a required dependency**.
 
 ## Repo layout
 
