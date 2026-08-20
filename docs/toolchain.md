@@ -1,0 +1,48 @@
+# Toolchain requirements (as of 2026-08, docs.ficsit.app "latest")
+
+Source: https://docs.ficsit.app/satisfactory-modding/latest/Development/BeginnersGuide/dependencies.html
+
+## Platform
+
+- **Windows** is the primary supported platform. **Linux** has a separate guide:
+  https://docs.ficsit.app/satisfactory-modding/latest/Development/BeginnersGuide/LinuxSetup.html
+- **macOS is not supported.** The custom engine editor is distributed as Win64
+  installers only, and the game itself is Windows-only. Editing source/docs on the
+  Mac and building on a Windows/Linux box via this git repo is the workable split.
+
+## Required software (Windows path)
+
+1. **Satisfactory** itself (Steam or Epic), launched at least once.
+2. **Visual Studio 2022** (specifically 2022, *not* 2026) with:
+   - Workloads: .NET Desktop Development, Desktop development with C++, Game development with C++
+   - Components: MSVC v143 x64/x86 build tools (v14.38-17.8), .NET 8.0 Runtime (LTS), .NET Framework 4.8.1 SDK
+   - The docs provide an importable `.vsconfig` to select these automatically.
+   - Rider is a popular alternative IDE but VS + MSVC packages must still be installed.
+3. **Custom Unreal Engine 5.6.1-CSS** (Coffee Stain's modified engine + community changes):
+   - Requires a GitHub account linked to Epic Games (for base UE repo access), then
+     linked to the modding org via https://linker.ficsit.app/link
+   - Download installer (`UnrealEngine-CSS-Editor-Win64.exe` + 3 `.bin` files) from
+     https://github.com/satisfactorymodding/UnrealEngine/releases/latest
+   - Engine version must match the game version being modded.
+4. **Clang cross-compile toolchain** (v25, clang-18.1.0-based) — only needed to build
+   for Linux dedicated servers.
+5. **Wwise** audio SDK — integrated into the starter project (see Project Setup page).
+6. **Starter project**: clone https://github.com/satisfactorymodding/SatisfactoryModLoader
+   (Option A, recommended) — mods are developed as plugins inside it.
+
+## Sizing
+
+- 30+ GB disk for the environment; budget ~100 GB to be safe.
+- A real GPU is needed for the Unreal editor (rules out most non-GPU cloud VMs).
+
+## Setup helper
+
+Community tool **SMEH** (SirDigby) automates much of the setup on standard systems —
+linked from the dependencies page.
+
+## When dev starts
+
+The SatisfactoryModLoader starter project becomes the working repo on the build
+machine; this repo's mod plugin folder (`Mods/<ModReference>/`) is what gets developed
+and can be tracked here. See:
+https://docs.ficsit.app/satisfactory-modding/latest/Development/BeginnersGuide/StarterProjectStructure.html
