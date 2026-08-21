@@ -40,9 +40,30 @@ Source: https://docs.ficsit.app/satisfactory-modding/latest/Development/Beginner
 Community tool **SMEH** (SirDigby) automates much of the setup on standard systems —
 linked from the dependencies page.
 
-## When dev starts
+## Current state (2026-08-20, Windows machine)
 
-The SatisfactoryModLoader starter project becomes the working repo on the build
-machine; this repo's mod plugin folder (`Mods/<ModReference>/`) is what gets developed
-and can be tracked here. See:
-https://docs.ficsit.app/satisfactory-modding/latest/Development/BeginnersGuide/StarterProjectStructure.html
+Done:
+
+- Starter project cloned at the repo root two levels up (`SatisfactoryModLoader/`,
+  branch `master`, headers at CL502094).
+- This repo moved to `SatisfactoryModLoader/Mods/StackResizerSplitFix/` and is now the
+  mod's Unreal plugin folder — see the README for the layout and rationale.
+- Plugin scaffold created: `.uplugin`, `Config/`, `Resources/`, and the C++ module
+  `Source/StackResizerSplitFix/`.
+
+Still required on this machine before the mod can be built:
+
+1. Visual Studio 2022 with the workloads/components listed above.
+2. Custom Unreal Engine 5.6.1-CSS installed — `FactoryGame.uproject` has
+   `"EngineAssociation": "5.6.1-CSS"`.
+3. Wwise 2023.1.14.8770 integrated into the starter project, and soundbanks generated.
+4. Generate Visual Studio project files, then build `Development Editor | Win64 | FactoryGame`.
+5. Clang cross-compile toolchain (v25, clang-18.1.0) — **required, not optional** here,
+   because `Config/Alpakit.ini` builds the `LinuxServer` target and the bug only
+   reproduces in multiplayer / on dedicated servers.
+
+References:
+
+- https://docs.ficsit.app/satisfactory-modding/latest/Development/BeginnersGuide/project_setup.html
+- https://docs.ficsit.app/satisfactory-modding/latest/Development/BeginnersGuide/StarterProjectStructure.html
+- https://docs.ficsit.app/satisfactory-modding/latest/Development/Cpp/setup.html
