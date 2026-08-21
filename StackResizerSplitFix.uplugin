@@ -1,0 +1,38 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"SemVersion": "1.0.0",
+	"GameVersion": ">=491125",
+	"FriendlyName": "Stack Resizer Split Fix",
+	"Description": "Fixes stack splitting failing when stack sizes are above their vanilla values",
+	"Category": "Modding",
+	"CreatedBy": "Redmega",
+	"CreatedByURL": "https://github.com/Redmega",
+	"DocsURL": "https://github.com/Redmega/split_stack_mod_fix",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/Redmega/split_stack_mod_fix/issues",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "StackResizerSplitFix",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "SML",
+			"Enabled": true,
+			"SemVersion": "^3.12.0"
+		},
+		{
+			"Name": "StackResizer",
+			"Enabled": true,
+			"SemVersion": "^1.4.3"
+		}
+	]
+}
