@@ -2,7 +2,7 @@
 
 ## The actual problem
 
-Vanilla Satisfactory already supports stack splitting (right-click = split, right-click-hold = pick amount). The bug: with **Stack Resizer** (https://ficsit.app/mod/StackResizer) installed and stack sizes increased, **splitting fails on any stack whose count exceeds the vanilla stack size**. Reproduced in-game (2026-08). Bug reports already exist against Stack Resizer with no movement — so this project builds a **companion patch mod**; upstream fix is not expected.
+Vanilla Satisfactory already supports stack splitting (right-click = split, right-click-hold = pick amount). The bug: with **Stack Resizer** (https://ficsit.app/mod/StackResizer) installed and stack sizes increased, **splitting fails on any stack whose count exceeds the vanilla stack size**. Reproduced in-game (2026-08). Bug reports already exist against Stack Resizer with no movement — so this project builds a **companion patch mod** and hopefully might help provide some help for a fix upstream.
 
 ## Stack Resizer facts (from SMR API, 2026-08-20)
 
