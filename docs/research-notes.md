@@ -9,10 +9,6 @@ Vanilla Satisfactory already supports stack splitting (right-click = split, righ
 - `mod_reference`: `StackResizer`, author **Acxd**, actively maintained
   (v1.4.3 for game 1.2, June 2026, `sml_version ^3.12.0`).
 - **No `source_url`** — closed source. No direct PR possible.
-- v1.4.0 changelog: "All BP functions ported to C++"; machine-buffer resizing split
-  out into a separate upcoming mod ("Machine Buffer Resizer").
-- Related open-source reference the author adapted: LFOB (Large Fluid Output Buffers,
-  https://ficsit.app/mod/LargeFluidOutputBuffers) by Joanna Hammond.
 
 ## Bug hypothesis (to verify once toolchain is available)
 
@@ -23,7 +19,7 @@ Vanilla Satisfactory already supports stack splitting (right-click = split, righ
   **replication / netcode**, not a simple UI clamp.
 - The split flow: a `CanSplitStack`-style check gates the action (it also decides
   whether the UI shows "open in codex" vs. split); `SplitStack` is called when it
-  returns true (per word).
+  returns true.
 - SirDigby (has seen the actual game source): "it isn't that simple" — i.e. not just
   an inlined stack-size enum comparison. Don't assume the naive clamp theory.
 
@@ -39,7 +35,7 @@ Secondary suspects (weaker, given the MP-only symptom): stack-size lookups via
 disagreeing only on the server side (does Stack Resizer's resize logic even run on
 dedicated servers?).
 
-## Where to look (investigation plan, needs Windows/Linux + toolchain)
+## Where to look
 
 1. **Characterize the failure mode across net modes** (bug is MP/dedi-only):
    - Confirm: SP works, listen-server host works?, remote client fails, dedi client
