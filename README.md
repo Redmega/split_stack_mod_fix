@@ -17,8 +17,9 @@ resized ones. The client then refuses to split anything larger than the vanilla 
 `CanSplitStackAtIdx` compares against the descriptor it can see.
 
 Rather than compete for a position in that ordering, this mod treats the server as the
-authority and repairs the client: `AStackSizeSyncSubsystem` replicates the server's effective
-stack size for every descriptor on join, applies it client-side, and re-checks for a short
+authority and repairs the client: `AStackSizeSyncSubsystem` sends the server's effective
+stack size for every descriptor on join (in batches, through a per-player remote call object),
+applies it client-side, and re-checks for a short
 window afterwards — the clobber has been observed landing *two seconds after* the first
 apply, so a single pass is not enough. See [`docs/research-notes.md`](docs/research-notes.md)
 for the full investigation and the log evidence.

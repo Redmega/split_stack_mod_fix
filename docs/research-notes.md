@@ -452,3 +452,25 @@ safety net, remains a reasonable future change.
 Hooking the clobber directly is not possible: the obvious target,
 `UFGItemDescriptor::UpdateCachedStackSize`, is inlined at its call sites in the shipped game
 binary, and nothing done at this mod's build time changes that.
+
+## Reliable buffer overflow on join: replication replaced with batched RCO transfer (2026-10-20)
+
+A dedicated server logged, at a client join:
+
+```
+LogNetPartialBunch: Warning: OutgoingBunches.Num (537) exceeds reliable threashold (8) but this would overflow the reliable buffer! Consider sending less stuff. Channel: [UActorChannel] Actor: StackSizeSyncSubsystem ...
+LogNetPartialBunch: Warning: SendBunch: Reliable partial bunch overflows reliable buffer! ...
+LogNetPartialBunch: Warning:    Num OutgoingBunches: 537. NumOutRec: 0
+```
+
+The replicated `AuthoritativeStackSizes` array went out whole in the subsystem's initial
+reliable bunch: 1827 entries, each a `TSubclassOf` exported as a NetGUID with its full outer
+chain (~260 bytes per entry), split into 537 partial bunches against `RELIABLE_BUFFER` (256).
+In the engine's `UChannel::SendBunch`, that second warning is followed by `NMT_Failure`
+("Outgoing reliable buffer overflow") and the connection closing. Why the 08-21 runs, also at
+1827 entries, got through is not known.
+
+Fix: the array is no longer replicated. The client pulls it through a per-player remote call
+object (`UStackSizeSyncRCO`) in batches of 100, one in flight at a time, and entries carry an
+`FSoftClassPath` instead of a class reference. The cost per bunch is now independent of the
+descriptor count.
